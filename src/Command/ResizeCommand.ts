@@ -1,10 +1,10 @@
-import { Command } from "./Command.js";
-import type { DimensionManager } from "./DimensionManager.js";
+import type { Command } from "./Command.ts";
+import type { DimensionManager } from "../DimensionManager.ts";
 // import type { Selection } from "./Selection.js";
 // import type { CellType, EditingCellType, EditingCellTypeOrNull } from "./types.js";
 
 
-export class ResizeCommand extends Command {
+export class ResizeCommand implements Command {
 
     private dimensionManager : DimensionManager;
     private index : number;
@@ -22,7 +22,7 @@ export class ResizeCommand extends Command {
         render : () => void
 
     ) {
-        super();
+        // super();
 
         this.dimensionManager = dimensionManager;
         this.index = index;

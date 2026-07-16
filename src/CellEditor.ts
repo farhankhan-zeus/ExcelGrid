@@ -1,4 +1,4 @@
-import type { Command } from "./Command.js";
+import type { Command } from "./Command/Command.js";
 import {
   EDITOR_BACKGROUND_COLOR_WHEN_ACTIVE,
   EDITOR_OPACITY,
@@ -8,9 +8,9 @@ import {
 } from "./constants.js";
 import type { DataStore } from "./Datastore.js";
 import type { DimensionManager } from "./DimensionManager.js";
-import { EditCellTextCommand } from "./EditCellTextCommand.js";
+import { EditCellTextCommand } from "./Command/EditCellTextCommand.js";
 import type { EditingCellTypeOrNull } from "./types.js";
-import type { UndoRedoManager } from "./UndoRedoManager.js";
+import type { UndoRedoManager } from "./Command/UndoRedoManager.js";
 
 export class CellEditor {
   private editorInput: HTMLInputElement;

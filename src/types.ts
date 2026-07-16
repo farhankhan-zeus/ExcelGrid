@@ -1,3 +1,4 @@
+import type { EventManager } from "./State/EventManager";
 
 
 
@@ -17,3 +18,11 @@ export type EmployeeType = {
 };
 
 export type CellType = "row" | "col";
+
+export interface HitRegion {
+  name: string;
+  // Determines if the click (x, y) falls inside this region
+  contains: (x: number, y: number) => boolean;
+  // What to do when this region is clicked
+  onMouseDown: (x: number, y: number, context: EventManager) => void;
+}

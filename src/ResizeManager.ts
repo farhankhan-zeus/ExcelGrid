@@ -1,4 +1,4 @@
-import type { Command } from "./Command.js";
+import type { Command } from "./Command/Command.js";
 import {
   DEFAULT_COL_WIDTH,
   DEFAULT_ROW_HEIGHT,
@@ -6,9 +6,9 @@ import {
   RESIZE_HANDLE_SIZE,
   ROWHDR_W,
 } from "./constants.js";
-import type { DimensionManager } from "./DimensionManager.js";
-import { ResizeCommand } from "./ResizeCommand.js";
-import type { UndoRedoManager } from "./UndoRedoManager.js";
+import type { DimensionManager } from "./DimensionManager.ts";
+import { ResizeCommand } from "./Command/ResizeCommand.ts";
+import type { UndoRedoManager } from "./Command/UndoRedoManager.ts";
 
 export class ResizeManager {
   private rowManager: DimensionManager;

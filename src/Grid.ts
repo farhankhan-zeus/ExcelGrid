@@ -7,13 +7,13 @@ import {
 } from "./constants.js";
 import { DataStore } from "./Datastore.js";
 import { DimensionManager } from "./DimensionManager.js";
-import { EventManager } from "./EventManager.js";
+import { EventManager } from "./State/EventManager.js";
 import { FormulaEngine } from "./FormulaEngine.js";
 import { GridRenderer } from "./GridRenderer.js";
 import { ResizeManager } from "./ResizeManager.js";
 import { Selection } from "./Selection.js";
 import { StatusBarManager } from "./StatusBarManager.js";
-import { UndoRedoManager } from "./UndoRedoManager.js";
+import { UndoRedoManager } from "./Command/UndoRedoManager.js";
 
 export class Grid {
   // HTML elements used to render the grid

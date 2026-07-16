@@ -1,8 +1,8 @@
-import { Command } from "./Command.js";
-import type { DataStore } from "./Datastore.js";
+import type { Command } from "./Command.js";
+import type { DataStore } from "../Datastore.js";
 
 
-export class EditCellTextCommand extends Command {
+export class EditCellTextCommand implements Command {
 
     private editorInput : HTMLInputElement;
     private dataStore : DataStore;
@@ -21,7 +21,7 @@ export class EditCellTextCommand extends Command {
         col : number,
         render : () => void
     ) {
-        super();
+        // super();
         this.editorInput = editorInput;
         this.dataStore = dataStore;
         this.oldValue = oldValue;

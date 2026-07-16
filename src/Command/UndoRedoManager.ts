@@ -1,4 +1,4 @@
-import type { Command } from "./Command.js";
+import type { Command } from "./Command.ts";
 
 
 export class UndoRedoManager {
