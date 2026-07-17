@@ -36,7 +36,7 @@ export class EventManager {
 
   public changeState(state: CanvasState): void {
     this.currentState = state;
-    console.log(state);
+   
   }
 
   public getCurrentState(): CanvasState {
@@ -85,7 +85,7 @@ export class EventManager {
     });
 
     // Keys / Hotkeys & Command System
-    window.addEventListener("keydown", (e) => this.onKeydown(e));
+    window.addEventListener("keydown", (e) => this.keydownhandler(e));
     window.addEventListener("keydown", (e) => {
       if (!(e.ctrlKey || e.metaKey)) return;
       if (e.key.toLowerCase() === "z" && !e.shiftKey) {
@@ -101,7 +101,7 @@ export class EventManager {
     this.redoBtn.addEventListener("click", () => this.undoRedoManager.redo());
   }
 
-  private onKeydown(e: KeyboardEvent) {
+  private keydownhandler(e: KeyboardEvent) {
     const { row, col } = this.selection.getActivecell();
     let newRow = row;
     let newCol = col;
