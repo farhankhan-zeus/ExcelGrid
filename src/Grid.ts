@@ -145,6 +145,7 @@ export class Grid {
       },
       () => this.resizeCanvas(),
       () => this.render(),
+      ()=>this.scrollToActiveCell(),
     );
 
     this.statusBarManager = new StatusBarManager(
@@ -189,10 +190,57 @@ export class Grid {
   public getDataStore(): DataStore {
     return this.dataStore;
   }
+ public scrollToActiveCell(): void {
+  const activeCell = this.selection.getActivecell();
+  const row = activeCell.row;
+  const col = activeCell.col;
+
+
+  const cellLeft = this.colManager.getOffset(col);
+  const cellWidth = this.colManager.getSize(col);
+  const cellTop = this.rowManager.getOffset(row);
+  const cellHeight = this.rowManager.getSize(row);
+
+
+  const usableWidth = this.canvas.width - ROWHDR_W;
+  const usableHeight = this.canvas.height - HEADER_H;
+
+
+  const thresholdWidth = usableWidth * 0.8;
+  const thresholdHeight = usableHeight * 0.8;
+
+
+  const cellRelativeLeft = cellLeft - this.scrollX;
+  const cellRelativeTop = cellTop - this.scrollY;
+
+  // 5. Track if updates are actually needed
+  let targetScrollX = this.scrollX;
+  let targetScrollY = this.scrollY;
+
+  if (cellRelativeLeft + cellWidth > thresholdWidth) {
+    // Snap scroll so the cell rests comfortably at the 80% mark
+    targetScrollX = cellLeft + cellWidth - thresholdWidth;
+  } 
+  else if (cellRelativeLeft < 0) {
+    targetScrollX = cellLeft;
+  }
+
+
+  if (cellRelativeTop + cellHeight > thresholdHeight) {
+    // Snap scroll so the cell rests comfortably at the 80% mark
+    targetScrollY = cellTop + cellHeight - thresholdHeight;
+  } 
+
+  else if (cellRelativeTop < 0) {
+    targetScrollY = cellTop;
+  }
+
+  this.scrollX = Math.max(0, targetScrollX);
+  this.scrollY = Math.max(0, targetScrollY);
+}
 
 
 
-  // core methods for grid
   public render() {
     this.renderer.render();
     this.statusBarManager.updateStatusBar();

@@ -29,6 +29,7 @@ export class EventManager {
     private setScroll: (x: number, y: number) => void,
     private resizeCanvas: () => void,
     public render: () => void,
+    public scrollToActiveCell:()=> void,
   ) {
     // Instantiate with default idle behavior
     this.currentState = new IdleState();
@@ -105,6 +106,7 @@ export class EventManager {
     const { row, col } = this.selection.getActivecell();
     let newRow = row;
     let newCol = col;
+    let moved=false;
 
     const bounds = this.selection.getBounds();
     const isRangeSelected = (bounds.top !== bounds.bottom) || (bounds.left !== bounds.right);
@@ -113,18 +115,22 @@ export class EventManager {
       case 'ArrowUp':
         e.preventDefault();
         newRow = Math.max(0, row - 1);
+         if (newRow<=bounds.top){moved=true}
         break;
       case 'ArrowDown':
         e.preventDefault();
         newRow = Math.min(this.rowManager.getCount() - 1, row + 1);
+        if (newRow>=bounds.bottom){moved=true};
         break;
       case 'ArrowLeft':
         e.preventDefault();
         newCol = Math.max(0, col - 1);
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        newCol = Math.min(this.colManager.getCount() - 1, col + 1);
+         if (newCol<=bounds.left){moved=true}
+         break;
+         case 'ArrowRight':
+           e.preventDefault();
+           newCol = Math.min(this.colManager.getCount() - 1, col + 1);
+           if (newCol>=bounds.right){moved=true}
         break;
       case ' ':
         e.preventDefault();
@@ -133,7 +139,7 @@ export class EventManager {
         return;
 
       case 'Tab':
-        if (row === 0 || col === 0 || col === this.colManager.getCount()) return;
+        if (col === this.colManager.getCount()) return;
         e.preventDefault();
 
         if (isRangeSelected) {
@@ -141,9 +147,12 @@ export class EventManager {
             if (col === bounds.left) {
               newCol = bounds.right;
               newRow = row === bounds.top ? bounds.bottom : row - 1;
+              
             } else {
               newCol = col - 1;
             }
+          
+            
           } else {
             if (col === bounds.right) {
               newCol = bounds.left;
@@ -151,18 +160,21 @@ export class EventManager {
             } else {
               newCol = col + 1;
             }
+            
           }
         } else {
           if (e.shiftKey) {
             newCol = Math.max(0, col - 1);
+              if (newCol<=bounds.left){moved=true}
           } else {
             newCol = Math.min(this.colManager.getCount() - 1, col + 1);
+            if (newCol>=bounds.right){moved=true}
           }
         }
         break;
 
       case 'Enter':
-        if (row === 0 || col === 0 || row === this.rowManager.getCount()) return;
+        if ( row === this.rowManager.getCount()) return;
         e.preventDefault();
 
         if (isRangeSelected) {
@@ -173,6 +185,7 @@ export class EventManager {
             } else {
               newRow = row - 1;
             }
+            
           } else {
             if (row === bounds.bottom) {
               newRow = bounds.top;
@@ -180,12 +193,15 @@ export class EventManager {
             } else {
               newRow = row + 1;
             }
+          
           }
         } else {
           if (e.shiftKey) {
             newRow = Math.max(0, row - 1);
+             if (newRow<=bounds.top){moved=true}
           } else {
             newRow = Math.min(this.rowManager.getCount() - 1, row + 1);
+              if (newRow>=bounds.bottom){moved=true};
           }
         }
         break;
@@ -204,6 +220,10 @@ export class EventManager {
       this.cellEditor.finishEditing();
       this.changeState(new IdleState());
     }
+    if(moved){
+      this.scrollToActiveCell();
+    }
     this.render();
   }
+  
 }

@@ -44,6 +44,14 @@ private getHitRegions(context: EventManager): HitRegion[] {
       }
     },
     {
+      name: "RowColBorder",
+      contains: (x, y) => x < ROWHDR_W && y <HEADER_H,
+      onMouseDown: (x, y, ctx) => {
+        ctx.selection.selectAll(ctx.rowManager.getCount(), ctx.colManager.getCount());
+        ctx.render();
+      }
+    },
+    {
       name: "Grid Cell",
       contains: (x, y) => x > ROWHDR_W && y > HEADER_H,
       onMouseDown: (x, y, ctx) => {

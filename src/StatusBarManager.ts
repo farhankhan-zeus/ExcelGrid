@@ -88,6 +88,16 @@ export class StatusBarManager {
     let max = -Infinity;
     let avg = 0;
 
+    if(bounds.bottom>=50000){
+      let summary = document.getElementById("statsDiv");
+      if(summary) summary.style="display:none";
+      return;
+    }
+    else{
+      let summary = document.getElementById("statsDiv");
+      if(summary) summary.style="display:block";
+
+    }
     for (let r = bounds.top; r <= bounds.bottom; r++) {
       for (let c = bounds.left; c <= bounds.right; c++) {
         const rawValue = this.dataStore.getValue(r, c);
