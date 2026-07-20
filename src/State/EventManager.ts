@@ -71,21 +71,19 @@ export class EventManager {
       this.render();
     });
 
-    // ----------------------------------------------------
-    // Canvas Event Delegation to the current State
-    // ----------------------------------------------------
+  
     this.canvas.addEventListener("mousedown", (e) => this.currentState.handleMouseDown(e, this));
     this.canvas.addEventListener("mousemove", (e) => this.currentState.handleMouseMove(e, this));
     window.addEventListener("mouseup", (e) => this.currentState.handleMouseUp(e, this));
     this.canvas.addEventListener("dblclick", (e) => this.currentState.handleDoubleClick(e, this));
 
-    // Editor input events
+ 
     this.editorInput.addEventListener("blur", () => {
       this.cellEditor.finishEditing();
       this.changeState(new IdleState());
     });
 
-    // Keys / Hotkeys & Command System
+
     window.addEventListener("keydown", (e) => this.keydownhandler(e));
     window.addEventListener("keydown", (e) => {
       if (!(e.ctrlKey || e.metaKey)) return;

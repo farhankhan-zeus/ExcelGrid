@@ -20,12 +20,11 @@ export class ResizeManager {
   private render: () => void;
 
   // for resizing the grid,
-  private resizingColInd: number | null; // index of column being resized, null if not resizing
-  private resizingRowInd: number | null; // index of row being resized, null if not resizing
-  private resizingStartX: number; // starting x position of mouse when resizing started
-  private resizingStartY: number; // starting y position of mouse when resizing started
-  private resizeStartSize: number; // starting size of row/column (before resizing started)
-
+  private resizingColInd: number | null; 
+  private resizingRowInd: number | null; 
+  private resizingStartX: number; 
+  private resizingStartY: number; 
+  private resizeStartSize: number; 
   constructor(
     rowManager: DimensionManager,
     colManager: DimensionManager,
@@ -55,9 +54,6 @@ export class ResizeManager {
     return this.resizingColInd !== null || this.resizingRowInd !== null;
   }
 
-  // cell resize helpers
-
-  // get the column border at the given x coordinate (used for resizing columns)
   public getColumnBorderIndexAt(x: number, y: number): number | null {
     if (y > HEADER_H) return null; // not in column header area
 
@@ -75,7 +71,7 @@ export class ResizeManager {
     return null;
   }
 
-  // get the row border at the given y coordinate (used for resizing rows)
+
   public getRowBorderIndexAt(x: number, y: number): number | null {
     if (x > ROWHDR_W) return null;
 
@@ -93,16 +89,9 @@ export class ResizeManager {
     return null;
   }
 
-  public handleMouseDown(x: number, y: number): boolean {
+  public RowhandleMouseDown(x: number, y: number): boolean {
     // check if mouse is clicked on a header border area (for resizing)
-    const colBorderInd = this.getColumnBorderIndexAt(x, y);
-    if (colBorderInd !== null) {
-      this.resizingColInd = colBorderInd;
-      this.resizingStartX = x;
-      this.resizeStartSize = this.colManager.getSize(colBorderInd);
-      this.render();
-      return true;
-    }
+    
 
     const rowBorderInd = this.getRowBorderIndexAt(x, y);
     if (rowBorderInd !== null) {
@@ -117,19 +106,8 @@ export class ResizeManager {
     return false;
   }
 
-  public handleMouseMove(x: number, y: number): boolean {
+  public RowhandleMouseMove(x: number, y: number): boolean {
     // while resizing a row/column is in progress
-    if (this.resizingColInd !== null) {
-      const newSize = Math.max(
-        DEFAULT_COL_WIDTH,
-        this.resizeStartSize + (x - this.resizingStartX),
-      );
-      this.colManager.setSize(this.resizingColInd, newSize);
-      this.setupSpacer();
-      this.render();
-      return true;
-    }
-
     if (this.resizingRowInd !== null) {
       const newSize = Math.max(
         DEFAULT_ROW_HEIGHT,
@@ -145,21 +123,23 @@ export class ResizeManager {
     return false;
   }
 
-  public handleMouseUp(): boolean {
+  public RowhandleMouseUp(): boolean {
 
     let handled = false;
 
      // stop resizing if any
-    if (this.resizingColInd !== null) {
-      const resizingColInd = this.resizingColInd;
+   
+
+    if (this.resizingRowInd !== null) {
+      const resizingRowInd = this.resizingRowInd;
       const oldResizingSize = this.resizeStartSize;
-      const newResizingSize = this.colManager.getSize(resizingColInd);
+      const newResizingSize = this.rowManager.getSize(resizingRowInd);
 
       // TODO : match input field size with cell size when resizing a column/row while editing a cell
       if (oldResizingSize !== newResizingSize) {
         const command: Command = new ResizeCommand(
-          this.colManager,
-          resizingColInd,
+          this.rowManager,
+          resizingRowInd,
           oldResizingSize,
           newResizingSize,
           () => this.setupSpacer(),
@@ -169,9 +149,52 @@ export class ResizeManager {
         this.undoRedoManager.pushCommand(command);
       }
 
-      this.resizingColInd = null;
+      this.resizingRowInd = null;
       handled = true;
     }
+
+    this.render();
+    return handled;
+  }
+  public ColhandleMouseDown(x: number, y: number): boolean {
+    // check if mouse is clicked on a header border area (for resizing)
+    const colBorderInd = this.getColumnBorderIndexAt(x, y);
+    if (colBorderInd !== null) {
+      this.resizingColInd = colBorderInd;
+      this.resizingStartX = x;
+      this.resizeStartSize = this.colManager.getSize(colBorderInd);
+      this.render();
+      return true;
+    }
+
+   
+
+    this.render();
+    return false;
+  }
+
+  public ColhandleMouseMove(x: number, y: number): boolean {
+    // while resizing a row/column is in progress
+    if (this.resizingColInd !== null) {
+      const newSize = Math.max(
+        DEFAULT_COL_WIDTH,
+        this.resizeStartSize + (x - this.resizingStartX),
+      );
+      this.colManager.setSize(this.resizingColInd, newSize);
+      this.setupSpacer();
+      this.render();
+      return true;
+    }
+
+    
+
+    this.render(); 
+    return false;
+  }
+
+  public ColhandleMouseUp(): boolean {
+
+    let handled = false;
 
     if (this.resizingRowInd !== null) {
       const resizingRowInd = this.resizingRowInd;

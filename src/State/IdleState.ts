@@ -2,26 +2,38 @@
 import type { CanvasState } from "./CanvasState.ts";
 import type { EventManager } from "./EventManager.ts";
 import { DragSelectionState } from "./DragSelectionState.ts";
-import { ResizingState } from "./ResizingState.ts";
+import { RowResizingState } from "./RowResizingState.ts";
+import { ColResizingState } from "./ColResizingState.ts";
 import { EditingState } from "./EditingState.ts";
 import { HEADER_H, ROWHDR_W } from "../constants.ts";
-import type { HitRegion } from "../types.ts"; // Assuming you define the interface here or elsewhere
+import type { HitRegion } from "../types.ts"; 
 
 export class IdleState implements CanvasState {
   
 private getHitRegions(context: EventManager): HitRegion[] {
   return [
     {
-      name: "Resize Handle",
-      // Since you don't have a direct "isOverBorder" helper, 
+      name: "ColResize Handle",
+      
+      contains: (x, y) => 
+        context.resizeManager.getColumnBorderIndexAt(x, y) !== null,
+      onMouseDown: (x, y, ctx) => {
+      
+        if (ctx.resizeManager.ColhandleMouseDown(x, y)) {
+          ctx.changeState(new ColResizingState());
+        }
+      }
+    },
+    {
+      name: "RowResize Handle",
+    
       // we can reuse the index checks you already use in handleMouseMove!
       contains: (x, y) => 
-        context.resizeManager.getColumnBorderIndexAt(x, y) !== null ||
         context.resizeManager.getRowBorderIndexAt(x, y) !== null,
       onMouseDown: (x, y, ctx) => {
-        // Execute the actual state change on a successful drag initiation
-        if (ctx.resizeManager.handleMouseDown(x, y)) {
-          ctx.changeState(new ResizingState());
+   
+        if (ctx.resizeManager.RowhandleMouseDown(x, y)) {
+          ctx.changeState(new RowResizingState());
         }
       }
     },
