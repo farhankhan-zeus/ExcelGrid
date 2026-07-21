@@ -8,9 +8,10 @@ import type { ResizeManager } from "../ResizeManager.js";
 import type { Selection } from "../Selection.js";
 import type { UndoRedoManager } from "../Command/UndoRedoManager.js";
 import { EditingState } from "./EditingState.js";
+import { StateContext } from "./StateContext.js";
 
 export class EventManager {
-  private currentState: CanvasState;
+  private state: StateContext;
 
   constructor(
     public canvas: HTMLCanvasElement,
@@ -32,17 +33,14 @@ export class EventManager {
     public scrollToActiveCell:()=> void,
   ) {
     // Instantiate with default idle behavior
-    this.currentState = new IdleState();
+    this.state = new StateContext(new IdleState());
   }
 
   public changeState(state: CanvasState): void {
-    this.currentState = state;
+    this.state.setState(state);
    
   }
 
-  public getCurrentState(): CanvasState {
-    return this.currentState;
-  }
 
   // Row selection lookup utility
   public getRowAtY(y: number): number {
@@ -72,10 +70,10 @@ export class EventManager {
     });
 
   
-    this.canvas.addEventListener("mousedown", (e) => this.currentState.handleMouseDown(e, this));
-    this.canvas.addEventListener("mousemove", (e) => this.currentState.handleMouseMove(e, this));
-    window.addEventListener("mouseup", (e) => this.currentState.handleMouseUp(e, this));
-    this.canvas.addEventListener("dblclick", (e) => this.currentState.handleDoubleClick(e, this));
+    this.canvas.addEventListener("mousedown", (e) => this.state.handleMouseDown(e, this));
+    this.canvas.addEventListener("mousemove", (e) => this.state.handleMouseMove(e, this));
+    window.addEventListener("mouseup", (e) => this.state.handleMouseUp(e, this));
+    this.canvas.addEventListener("dblclick", (e) => this.state.handleDoubleClick(e, this));
 
  
     this.editorInput.addEventListener("blur", () => {
