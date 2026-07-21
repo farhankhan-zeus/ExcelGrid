@@ -1,92 +1,44 @@
-// IdleState.ts
-import type { CanvasState } from "./CanvasState.ts";
-import type { EventManager } from "./EventManager.ts";
-import { DragSelectionState } from "./DragSelectionState.ts";
-import { RowResizingState } from "./RowResizingState.ts";
-import { ColResizingState } from "./ColResizingState.ts";
-import { EditingState } from "./EditingState.ts";
-import { HEADER_H, ROWHDR_W } from "../constants.ts";
-import type { HitRegion } from "../types.ts"; 
+import type { CanvasState } from "./CanvasState.js";
+import type { EventManager } from "./EventManager.js";
+import { ColResizingState } from "./ColResizingState.js";
+import { RowResizingState } from "./RowResizingState.js";
+import { ColumnHeaderState } from "./ColumnHeaderState.js";
+import { RowHeaderState } from "./RowHeaderState.js";
+import { SelectAllState } from "./SelectAllState.js";
+import { DragSelectionState } from "./DragSelectionState.js";
+import { EditingState } from "./EditingState.js";
+import { HEADER_H, ROWHDR_W } from "../constants.js";
 
 export class IdleState implements CanvasState {
-  
-private getHitRegions(context: EventManager): HitRegion[] {
-  return [
-    {
-      name: "ColResize Handle",
-      
-      contains: (x, y) => 
-        context.resizeManager.getColumnBorderIndexAt(x, y) !== null,
-      onMouseDown: (x, y, ctx) => {
-      
-        if (ctx.resizeManager.ColhandleMouseDown(x, y)) {
-          ctx.changeState(new ColResizingState());
-        }
-      }
-    },
-    {
-      name: "RowResize Handle",
-    
-      // we can reuse the index checks you already use in handleMouseMove!
-      contains: (x, y) => 
-        context.resizeManager.getRowBorderIndexAt(x, y) !== null,
-      onMouseDown: (x, y, ctx) => {
-   
-        if (ctx.resizeManager.RowhandleMouseDown(x, y)) {
-          ctx.changeState(new RowResizingState());
-        }
-      }
-    },
-    {
-      name: "Column Header",
-      contains: (x, y) => y < HEADER_H && x > ROWHDR_W,
-      onMouseDown: (x, y, ctx) => {
-        const col = ctx.getColAtX(x);
-        ctx.selection.selectColumn(col, ctx.rowManager.getCount());
-        ctx.render();
-      }
-    },
-    {
-      name: "Row Header",
-      contains: (x, y) => x < ROWHDR_W && y > HEADER_H,
-      onMouseDown: (x, y, ctx) => {
-        const row = ctx.getRowAtY(y);
-        ctx.selection.selectRow(row, ctx.colManager.getCount());
-        ctx.render();
-      }
-    },
-    {
-      name: "RowColBorder",
-      contains: (x, y) => x < ROWHDR_W && y <HEADER_H,
-      onMouseDown: (x, y, ctx) => {
-        ctx.selection.selectAll(ctx.rowManager.getCount(), ctx.colManager.getCount());
-        ctx.render();
-      }
-    },
-    {
-      name: "Grid Cell",
-      contains: (x, y) => x > ROWHDR_W && y > HEADER_H,
-      onMouseDown: (x, y, ctx) => {
-        const row = ctx.getRowAtY(y);
-        const col = ctx.getColAtX(x);
-        ctx.selection.selectCell(row, col);
-        ctx.render();
-        ctx.changeState(new DragSelectionState());
-      }
-    }
-  ];
-}
+  private candidateStates: CanvasState[];
+
+  constructor(customCandidates?: CanvasState[]) {
+    // Order of precedence for hit testing
+    this.candidateStates = customCandidates ?? [
+      new ColResizingState(),
+      new RowResizingState(),
+      new ColumnHeaderState(),
+      new RowHeaderState(),
+      new SelectAllState(),
+      new DragSelectionState(),
+    ];
+  }
+
+  public hitTest(_x: number, _y: number, _context: EventManager): boolean {
+    return true;
+  }
 
   public handleMouseDown(e: MouseEvent, context: EventManager): void {
     const x = e.offsetX;
     const y = e.offsetY;
-    const regions = this.getHitRegions(context);
 
-    // Loop through the hit regions
-    for (const region of regions) {
-      if (region.contains(x, y)) {
-        region.onMouseDown(x, y, context);
-        break; // Stop evaluating further regions once we have a hit
+    for (const state of this.candidateStates) {
+      if (state.hitTest(x, y, context)) {
+        // Transition context to the state that won the hit test
+        context.changeState(state);
+        // Execute the initial mouse down logic on that state
+        state.handleMouseDown(e, context);
+        break;
       }
     }
   }
@@ -95,7 +47,7 @@ private getHitRegions(context: EventManager): HitRegion[] {
     const x = e.offsetX;
     const y = e.offsetY;
 
-    // We can also leverage hit testing here to change cursor styles!
+    // Hover cursor updates
     if (context.resizeManager.getColumnBorderIndexAt(x, y) !== null) {
       context.canvas.style.cursor = "col-resize";
     } else if (context.resizeManager.getRowBorderIndexAt(x, y) !== null) {
@@ -105,13 +57,15 @@ private getHitRegions(context: EventManager): HitRegion[] {
     }
   }
 
-  public handleMouseUp(e: MouseEvent, context: EventManager): void {}
+  public handleMouseUp(_e: MouseEvent, _context: EventManager): void {}
 
   public handleDoubleClick(e: MouseEvent, context: EventManager): void {
+    if(context.selection.isCellRange()){
+      return;
+    }
     const x = e.offsetX;
     const y = e.offsetY;
-    
-    // Quick boundary guard
+
     if (x < ROWHDR_W || y < HEADER_H) return;
 
     const row = context.getRowAtY(y);

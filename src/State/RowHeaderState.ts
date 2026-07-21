@@ -3,33 +3,18 @@ import type { EventManager } from "./EventManager.js";
 import { IdleState } from "./IdleState.js";
 import { HEADER_H, ROWHDR_W } from "../constants.js";
 
-export class DragSelectionState implements CanvasState {
+export class RowHeaderState implements CanvasState {
   public hitTest(x: number, y: number, _context: EventManager): boolean {
-    return x > ROWHDR_W && y > HEADER_H;
+    return x < ROWHDR_W && y > HEADER_H;
   }
 
   public handleMouseDown(e: MouseEvent, context: EventManager): void {
     const row = context.getRowAtY(e.offsetY);
-    const col = context.getColAtX(e.offsetX);
-
-    // Initial click selects the single cell
-    context.selection.selectCell(row, col);
+    context.selection.selectRow(row, context.colManager.getCount());
     context.render();
   }
 
-  public handleMouseMove(e: MouseEvent, context: EventManager): void {
-    const x = e.offsetX;
-    const y = e.offsetY;
-
-    if (x < ROWHDR_W || y < HEADER_H) return;
-
-    const row = context.getRowAtY(y);
-    const col = context.getColAtX(x);
-
-    // Extending selection while dragging
-    context.selection.extendTo(row, col);
-    context.render();
-  }
+  public handleMouseMove(_e: MouseEvent, _context: EventManager): void {}
 
   public handleMouseUp(_e: MouseEvent, context: EventManager): void {
     context.changeState(new IdleState());
