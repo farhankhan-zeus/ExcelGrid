@@ -31,6 +31,7 @@ export class EventManager {
     private resizeCanvas: () => void,
     public render: () => void,
     public scrollToActiveCell:()=> void,
+    public scrollToEndCell:()=>void,
   ) {
     // Instantiate with default idle behavior
     this.state = new StateContext(new IdleState());
@@ -103,6 +104,7 @@ export class EventManager {
     let newRow = row;
     let newCol = col;
     let moved=false;
+    let cellranged=false;
 
     const bounds = this.selection.getBounds();
     const isRangeSelected = (bounds.top !== bounds.bottom) || (bounds.left !== bounds.right);
@@ -110,21 +112,34 @@ export class EventManager {
     switch (e.key) {
       case 'ArrowUp':
         e.preventDefault();
+        if(e.shiftKey){
+          cellranged=true;
+        }       
         newRow = Math.max(0, row - 1);
+        
          if (newRow<=bounds.top){moved=true}
         break;
       case 'ArrowDown':
         e.preventDefault();
+        if(e.shiftKey){
+          cellranged=true;
+        }
         newRow = Math.min(this.rowManager.getCount() - 1, row + 1);
         if (newRow>=bounds.bottom){moved=true};
         break;
       case 'ArrowLeft':
         e.preventDefault();
+        if(e.shiftKey){
+          cellranged=true;
+        }
         newCol = Math.max(0, col - 1);
          if (newCol<=bounds.left){moved=true}
          break;
          case 'ArrowRight':
            e.preventDefault();
+           if(e.shiftKey){
+          cellranged=true;
+        }
            newCol = Math.min(this.colManager.getCount() - 1, col + 1);
            if (newCol>=bounds.right){moved=true}
         break;
@@ -205,12 +220,19 @@ export class EventManager {
       default:
         return;
     }
+    
 
     if (isRangeSelected && (e.key === 'Tab' || e.key === 'Enter')) {
       this.selection.moveActiveCellWithinRange(newRow, newCol); 
-    } else {
+    } 
+    else if(cellranged){
+        this.selection.extendTo(newRow,newCol);
+        this.selection.moveActiveCellWithinRange(newRow,newCol);
+    }
+    else {
       this.selection.selectCell(newRow, newCol);
     }
+
 
     if (this.cellEditor.isEditing()) {
       this.cellEditor.finishEditing();

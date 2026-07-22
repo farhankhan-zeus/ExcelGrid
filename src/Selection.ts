@@ -98,7 +98,9 @@ export class Selection {
   public getActivecell() {
     return { row: this.activeRow, col: this.activeCol };
   }
-
+  public getEndCell(){
+    return {row:this.endRow,col:this.endCol};
+  }
   // NEW: Safely relocates the active focus cell without shrinking your selection box bounding bounds
   public moveActiveCellWithinRange(row: number, col: number): void {
     this.activeRow = row;
